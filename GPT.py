@@ -87,7 +87,6 @@ def job():
     exit()
 
 
-def timecheck():
 
 # Schedule job to run every Wednesday at 6am
 # schedule.every().friday.at("12:28:00").do(job)
