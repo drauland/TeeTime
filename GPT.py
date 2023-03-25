@@ -7,7 +7,7 @@ import datetime as dt
 import dateutil.relativedelta as rel
 
 eightAM = dt.time(8, 31, 00)
-sevenAM =dt.time(6,59,00)
+sevenAM = dt.time(6, 59, 00)
 
 # Create options object to launch Chrome with
 options = Options()
@@ -51,43 +51,32 @@ def job():
     browser.find_element("name", "date").send_keys(Keys.CONTROL, 'a')
     browser.find_element("name", "date").send_keys(Keys.BACKSPACE)
     # Enter next Saturday
-    browser.find_element("name", "date").send_keys(get_next_saturday())
+    # browser.find_element("name", "date").send_keys(get_next_saturday())
     # Enter next Sunday
-    # browser.find_element("name", "date").send_keys(get_next_sunday())
+    browser.find_element("name", "date").send_keys(get_next_sunday())
     browser.find_element("xpath", "//a[@data-value='4']").click()
     browser.find_element("xpath", "//a[@data-value='4']").click()
     time.sleep(1)
-    first_time = browser.find_element("class name", "booking-start-time-label").text
+    # Get a time if it's between 7 and 8:30, otherwise return the latest time
+    my_time = get_times()
+    print(my_time + ' is my time')
     date_format = '%I:%M%p'
-    datetime_str = dt.datetime.strptime(first_time, date_format)
-    # print the times
-    get_times()
-    time.sleep(10)
-    # temporarily exit so we don't book
-    browser.quit()
-    exit()
-    if datetime_str.time() < eightAM:
-        browser.find_element("class name", "booking-start-time-label").click()
+    my_time_str = dt.datetime.strptime(my_time, date_format)
+    # Try and click my time
+    my_xpath = "//div[normalize-space()='" + my_time + "']"
+    time.sleep(1)
+    if (my_time_str.time() < eightAM) and my_time_str.time() > sevenAM:
+        browser.find_element("xpath", my_xpath).click()
         time.sleep(2)
         browser.find_element("xpath", "//button[normalize-space()='Book Time']").click()
         time.sleep(2)
         browser.find_element("xpath", "//button[@class='btn btn-success col-xs-12 col-md-3 continue']").click()
         time.sleep(1)
-        #browser.find_element("xpath", "//button[@class='btn btn-success set-card col-xs-12 col-md-3']").click()
-        print('Booked ' + first_time + ' tee time. ')
+        browser.find_element("xpath", "//button[@class='btn btn-success set-card col-xs-12 col-md-3']").click()
+        print('Booked ' + my_time + ' tee time. ')
         time.sleep(3)
     else:
-        print('Couldn\'t find a time before 8. The earliest time was ' + first_time + ' booking for testing purposes.')
-        browser.find_element("class name", "booking-start-time-label").click()
-        time.sleep(2)
-        browser.find_element("xpath", "//button[normalize-space()='Book Time']").click()
-        time.sleep(2)
-        browser.find_element("xpath", "//button[@class='btn btn-success col-xs-12 col-md-3 continue']").click()
-        time.sleep(1)
-        #browser.find_element("xpath", "//button[@class='btn btn-success set-card col-xs-12 col-md-3']").click()
-        print('Booked ' + first_time + ' tee time. ')
-        time.sleep(3)
-        # print('Couldn\'t find a time at or before 8:30. The earliest time was ' + first_time)
+        print('Couldn\'t find a time between 7 and 8:30.')
     # Close browser
     browser.quit()
     exit()
@@ -102,19 +91,20 @@ def get_times():
         datetime_str = dt.datetime.strptime(list_of_elements[count].text, date_format)
         if (datetime_str.time() < eightAM) and datetime_str.time() > sevenAM:
             print(datetime_str)
+            return datetime_str
         else:
             print(list_of_elements[count].text + ' is not in between 7 and 8:30am')
         count = count + 1
+    return list_of_elements[count-1].text
 
 
 # Schedule job to run every Wednesday at 6am
-# schedule.every().friday.at("12:28:00").do(job)
-job()
+schedule.every().saturday.at("6:00:00").do(job)
 
 # Run continuously
-#while True:
-#    schedule.run_pending()
-#    time.sleep(1)
+while True:
+    schedule.run_pending()
+    time.sleep(1)
 
 
 
