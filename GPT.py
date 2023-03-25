@@ -7,6 +7,7 @@ import datetime as dt
 import dateutil.relativedelta as rel
 
 eightAM = dt.time(8, 31, 00)
+sevenAM =dt.time(6,59,00)
 
 # Create options object to launch Chrome with
 options = Options()
@@ -59,7 +60,12 @@ def job():
     first_time = browser.find_element("class name", "booking-start-time-label").text
     date_format = '%I:%M%p'
     datetime_str = dt.datetime.strptime(first_time, date_format)
-    print(browser.find_element("class name", "booking-start-time-label"[2]).text)
+    # print the times
+    get_times()
+    time.sleep(10)
+    # temporarily exit so we don't book
+    browser.quit()
+    exit()
     if datetime_str.time() < eightAM:
         browser.find_element("class name", "booking-start-time-label").click()
         time.sleep(2)
@@ -67,7 +73,7 @@ def job():
         time.sleep(2)
         browser.find_element("xpath", "//button[@class='btn btn-success col-xs-12 col-md-3 continue']").click()
         time.sleep(1)
-        browser.find_element("xpath", "//button[@class='btn btn-success set-card col-xs-12 col-md-3']").click()
+        #browser.find_element("xpath", "//button[@class='btn btn-success set-card col-xs-12 col-md-3']").click()
         print('Booked ' + first_time + ' tee time. ')
         time.sleep(3)
     else:
@@ -86,6 +92,19 @@ def job():
     browser.quit()
     exit()
 
+
+# Get the times from the page
+def get_times():
+    list_of_elements = browser.find_elements("class name", "booking-start-time-label")
+    count = 0
+    date_format = '%I:%M%p'
+    while count < len(list_of_elements):
+        datetime_str = dt.datetime.strptime(list_of_elements[count].text, date_format)
+        if (datetime_str.time() < eightAM) and datetime_str.time() > sevenAM:
+            print(datetime_str)
+        else:
+            print(list_of_elements[count].text + ' is not in between 7 and 8:30am')
+        count = count + 1
 
 
 # Schedule job to run every Wednesday at 6am
